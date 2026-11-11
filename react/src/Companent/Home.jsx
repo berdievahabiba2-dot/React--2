@@ -1,46 +1,37 @@
 
-import { useUserStore } from '@/store/counter'
-import React, { useState } from 'react'
+import React, { useEffect } from 'react'
+import { useUserStore } from '../store/counter'
 
 const Home = () => {
-  const { data, addUser, editUser, deleteUser } = useUserStore()
+  const {data,isLoading,error,getData,addData,editData,deleteData} = useUserStore()
 
-  const [elem, setElem] = useState({id: null,name: "",age: "",job: ""})
+  useEffect(() => {
+    getData()
+  }, [])
 
-  const handleSubmit = (event) => {
-    event.preventDefault()
-
-    const newUser = {
-      id: elem.id ? elem.id : Date.now(),
-      name: event.target.name.value,
-      age: event.target.age.value,
-      job: event.target.job.value,
-    }
-    elem.id ? editUser(newUser) : addUser(newUser)
-    event.target.reset()
-    setElem({ id: null, name: "", age: "", job: "" })
+  if (isLoading) {
+    return <h1 className="text-center text-2xl mt-10">Loading...</h1>
   }
 
-  const handleEdit = (e) => {
-    setElem(e)
+  if (error) {
+    return <h1 className="text-center text-red-500">{error}</h1>
   }
 
   return (
-    <div className="p-5">
-      <form onSubmit={handleSubmit} className="flex gap-3 mb-5">
-        <input name="name" placeholder="Name" value={elem.name}onChange={(e) => setElem({...elem, name: e.target.value})}className="border p-2 rounded"/>
-        <input name="age" placeholder="Age"value={elem.age}onChange={(e) => setElem({...elem, age: e.target.value})}className="border p-2 rounded"/>
-        <input name="job" placeholder="Job" value={elem.job}onChange={(e) => setElem({...elem, job: e.target.value})}className="border p-2 rounded"/>
-        <button className="bg-green-600 text-white px-4 rounded">{elem.id ? "Edit" : "Add"}</button>
-      </form>
-      <div className="flex flex-wrap gap-4">
+    <div className="max-w-5xl mx-auto p-5">
+      <h1 className="text-3xl font-bold text-center mb-6">Users</h1>
+      <button
+        onClick={() => addData({name: 'Habiba',age: 19,job: 'Student'})}className="bg-blue-600 text-white px-5 py-2 rounded-lg mb-6 hover:bg-blue-700">Add User</button>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {data.map((e) => (
-          <div key={e.id} className="border p-4 rounded-lg w-52">
-            <h2>{e.name}</h2>
-            <p>{e.age}</p>
-            <p>{e.job}</p>
-            <button onClick={() => handleEdit(e)}className="bg-blue-500 text-white px-3 py-1 rounded mr-2">Edit</button>
-            <button onClick={() => deleteUser(e.id)}className="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
+          <div key={e.id}className="bg-white p-5 rounded-xl shadow-md border border-gray-200">
+            <h2 className="text-xl font-bold text-gray-800 mb-3">{e.name}</h2>
+            <p className="text-gray-600 mb-2">Age: {e.age}</p>
+            <p className="text-gray-600 mb-4">Job: {e.job}</p>
+            <div className="flex gap-3">
+              <button onClick={() => editData({...e,name: 'New Name'})}className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">Edit</button>
+              <button onClick={() => deleteData(e.id)}className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">Delete</button>
+            </div>
           </div>
         ))}
       </div>
